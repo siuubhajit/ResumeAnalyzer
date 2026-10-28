@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Analyzer - AI-Powered Resume & Job Match Intelligence</title>
+  <meta name="description" content="Analyze your resume against job descriptions with AI, calculate match scores, detect missing skills, perform ATS checks, and get instant recommendations.">
+  
+  <!-- Inter & Plus Jakarta Sans Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Header / Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="{{ url_for('static', filename='icons/shield-check.svg') }}" alt="Resume Analyzer Logo" class="svg-icon">
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Resume Analyzer</span>
+          <span class="brand-badge">AI Powered</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#analyzer-section" class="nav-link active">Analyzer</a>
+        <a href="#assistant-section" class="nav-link">Improvement Assistant</a>
+        <button id="open-history-btn" class="nav-btn" title="View past analyses">
+          <img src="{{ url_for('static', filename='icons/history.svg') }}" alt="History Icon" class="svg-icon-sm">
+          <span>History</span>
+          <span id="history-count-badge" class="badge-counter">0</span>
+        </button>
+        <button id="theme-toggle-btn" class="theme-toggle" aria-label="Toggle theme">
+          <img id="theme-icon-sun" src="{{ url_for('static', filename='icons/sun.svg') }}" alt="Sun Icon" class="svg-icon-sm theme-sun">
+          <img id="theme-icon-moon" src="{{ url_for('static', filename='icons/moon.svg') }}" alt="Moon Icon" class="svg-icon-sm theme-moon">
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-content">
+        <h1 class="hero-title">Optimize Your Resume for Any Job Posting</h1>
+        <p class="hero-subtitle">
+          Upload your PDF resume and paste a job description. Our hybrid AI & NLP engine evaluates skill alignment, ATS compliance, semantic match, and generates tailored suggestions.
+        </p>
+      </div>
+    </section>
+
+    <!-- Error / Notification Banner -->
+    <div id="alert-banner" class="alert-banner hidden" role="alert">
+      <img id="alert-icon" src="{{ url_for('static', filename='icons/alert-triangle.svg') }}" alt="Alert Icon" class="svg-icon alert-icon">
+      <div id="alert-message" class="alert-message"></div>
+      <button id="alert-close-btn" class="alert-close" aria-label="Close notification">
+        <img src="{{ url_for('static', filename='icons/x-circle.svg') }}" alt="Close Icon" class="svg-icon-sm">
+      </button>
+    </div>
+
+    <!-- Analyzer Input Section -->
+    <section id="analyzer-section" class="input-section">
+      <form id="analyze-form" class="analyze-grid">
+        
+        <!-- Left Column: Resume Upload Card -->
+        <div class="card upload-card">
+          <div class="card-header">
+            <div class="card-header-title">
+              <img src="{{ url_for('static', filename='icons/file-text.svg') }}" alt="File Icon" class="svg-icon">
+              <h2>Step 1: Upload Resume</h2>
+            </div>
+            <span class="file-format-badge">PDF format only (Max 10 MB)</span>
+          </div>
+
+          <div class="card-body">
+            <!-- Dropzone -->
+            <div id="dropzone" class="dropzone" tabindex="0">
+              <input type="file" id="resume-file-input" name="resume" accept=".pdf" class="file-input-hidden">
+              <div class="dropzone-content">
+                <div class="dropzone-icon-circle">
+                  <img src="{{ url_for('static', filename='icons/upload.svg') }}" alt="Upload Icon" class="svg-icon-lg">
+                </div>
+                <p class="dropzone-text-primary">Drag & drop your PDF resume here</p>
+                <p class="dropzone-text-secondary">or <span class="highlight-link">browse your computer</span></p>
+                <p class="dropzone-hint">PyMuPDF text extraction supported</p>
+              </div>
+            </div>
+
+            <!-- Selected File Indicator (hidden by default) -->
+            <div id="selected-file-card" class="selected-file-card hidden">
+              <div class="selected-file-info">
+                <img src="{{ url_for('static', filename='icons/file-text.svg') }}" alt="Document Icon" class="svg-icon file-success-icon">
+                <div class="selected-file-meta">
+                  <span id="selected-filename" class="file-name">resume.pdf</span>
+                  <span id="selected-filesize" class="file-size">145 KB</span>
+                </div>
+              </div>
+              <button type="button" id="remove-file-btn" class="icon-btn-danger" title="Remove file">
+                <img src="{{ url_for('static', filename='icons/trash.svg') }}" alt="Remove" class="svg-icon-sm">
+              </button>
+            </div>
+
+            <!-- Quick Load Sample Resumes -->
+            <div class="sample-resumes-container">
+              <span class="sample-label">
+                <img src="{{ url_for('static', filename='icons/sparkles.svg') }}" alt="Sparkles Icon" class="svg-icon-xs">
+                Or test with a preloaded sample resume:
+              </span>
+              <div class="sample-buttons-row">
+                <button type="button" class="btn-sample-resume" data-sample-id="alex_turner_swe">
+                  Alex Turner (Full Stack Engineer)
+                </button>
+                <button type="button" class="btn-sample-resume" data-sample-id="priya_patel_data_scientist">
+                  Priya Patel (AI / Data Scientist)
+                </button>
+              </div>
+              <div id="sample-active-indicator" class="sample-active-bar hidden">
+                <span id="active-sample-name">Using sample resume</span>
+                <a id="view-sample-pdf-link" href="#" target="_blank" class="sample-pdf-link">
+                  <span>View PDF</span>
+                  <img src="{{ url_for('static', filename='icons/external-link.svg') }}" alt="Open" class="svg-icon-xs">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Job Description Card -->
+        <div class="card jd-card">
+          <div class="card-header">
+            <div class="card-header-title">
+              <img src="{{ url_for('static', filename='icons/briefcase.svg') }}" alt="Briefcase Icon" class="svg-icon">
+              <h2>Step 2: Job Description</h2>
+            </div>
+            <!-- Sample Job Dropdown -->
+            <div class="sample-job-dropdown-wrapper">
+              <select id="sample-job-select" class="sample-select" aria-label="Select sample job description">
+                <option value="">Load Sample Job Posting...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="textarea-wrapper">
+              <textarea 
+                id="job-description-input" 
+                name="job_description" 
+                rows="11" 
+                placeholder="Paste the target job description here (requirements, qualifications, responsibilities, technical stack)..."
+                required
+              ></textarea>
+              <div class="textarea-footer">
+                <span id="jd-char-count" class="counter-text">0 characters (0 words)</span>
+                <button type="button" id="clear-jd-btn" class="btn-text-action" title="Clear text">
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit & Actions Bar -->
+        <div class="form-action-bar">
+          <button type="submit" id="submit-btn" class="btn-primary-glow">
+            <img src="{{ url_for('static', filename='icons/target.svg') }}" alt="Target Icon" class="svg-icon">
+            <span>Analyze Resume & Calculate Match</span>
+          </button>
+          <button type="button" id="reset-btn" class="btn-secondary">
+            <img src="{{ url_for('static', filename='icons/refresh.svg') }}" alt="Reset Icon" class="svg-icon-sm">
+            <span>Reset All</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Loading State Indicator -->
+    <div id="loading-state" class="loading-state hidden">
+      <div class="loading-card">
+        <div class="spinner-ring"></div>
+        <h3 id="loading-title">Analyzing Resume Document...</h3>
+        <p id="loading-step" class="loading-subtitle">Extracting text and metadata with PyMuPDF...</p>
+        <div class="progress-bar-container">
+          <div id="loading-progress-bar" class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Dashboard (Hidden until analyzed) -->
+    <section id="results-dashboard" class="dashboard-section hidden">
+      
+      <!-- Top Overview KPI Strip -->
+      <div class="kpi-grid">
+        <!-- KPI 1: Overall Match Score -->
+        <div class="kpi-card kpi-card-hero">
+          <div class="kpi-chart-container">
+            <canvas id="gaugeChart" width="130" height="130"></canvas>
+            <div class="gauge-center-text">
+              <span id="kpi-overall-score" class="score-number">0%</span>
+              <span class="score-label">Match</span>
+            </div>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-label">Overall Alignment</span>
+            <h3 id="kpi-verdict" class="kpi-title">Calculating...</h3>
+            <p id="kpi-summary" class="kpi-description">Comparing resume keywords against target qualifications.</p>
+          </div>
+        </div>
+
+        <!-- KPI 2: TF-IDF Content Similarity -->
+        <div class="kpi-card">
+          <div class="kpi-icon-badge">
+            <img src="{{ url_for('static', filename='icons/chart-bar.svg') }}" alt="Chart Icon" class="svg-icon">
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">TF-IDF Similarity</span>
+            <div class="kpi-value-row">
+              <span id="kpi-tfidf-score" class="kpi-value">0%</span>
+            </div>
+            <span class="kpi-subtext">Cosine semantic overlap</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Technical Skills Match -->
+        <div class="kpi-card">
+          <div class="kpi-icon-badge">
+            <img src="{{ url_for('static', filename='icons/code.svg') }}" alt="Code Icon" class="svg-icon">
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Technical Skills</span>
+            <div class="kpi-value-row">
+              <span id="kpi-tech-score" class="kpi-value">0%</span>
+            </div>
+            <span id="kpi-tech-count" class="kpi-subtext">0 of 0 skills matched</span>
+          </div>
+        </div>
+
+        <!-- KPI 4: ATS Friendliness Score -->
+        <div class="kpi-card">
+          <div class="kpi-icon-badge">
+            <img src="{{ url_for('static', filename='icons/shield-check.svg') }}" alt="Shield Icon" class="svg-icon">
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">ATS Compliance</span>
+            <div class="kpi-value-row">
+              <span id="kpi-ats-score" class="kpi-value">0/100</span>
+            </div>
+            <span id="kpi-ats-rating" class="kpi-subtext">Checklist rating</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Bar -->
+      <div class="dashboard-controls-bar">
+        <div class="active-document-info">
+          <img src="{{ url_for('static', filename='icons/file-text.svg') }}" alt="Doc" class="svg-icon-sm">
+          <span>Analyzed: <strong id="analyzed-filename">resume.pdf</strong></span>
+          <span class="dot-separator">•</span>
+          <span id="analyzed-pages">1 page</span>
+          <span class="dot-separator">•</span>
+          <span id="analyzed-words">0 words</span>
+        </div>
+        <div class="export-actions">
+          <button id="print-report-btn" class="btn-action-outline" title="Print or save as PDF">
+            <img src="{{ url_for('static', filename='icons/printer.svg') }}" alt="Print" class="svg-icon-sm">
+            <span>Download Report</span>
+          </button>
+          <button id="export-json-btn" class="btn-action-outline" title="Export raw JSON analysis data">
+            <img src="{{ url_for('static', filename='icons/download.svg') }}" alt="Download" class="svg-icon-sm">
+            <span>Export JSON</span>
+          </button>
+          <button id="save-history-btn" class="btn-action-outline" title="Save this analysis to local history">
+            <img src="{{ url_for('static', filename='icons/history.svg') }}" alt="Save" class="svg-icon-sm">
+            <span>Save to History</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tabs-nav-container">
+        <div class="tabs-nav" role="tablist">
+          <button class="tab-button active" data-tab="tab-skills" role="tab" aria-selected="true">
+            <img src="{{ url_for('static', filename='icons/target.svg') }}" alt="Skills" class="svg-icon-sm">
+            <span>Skills & Match Analysis</span>
+          </button>
+          <button class="tab-button" data-tab="tab-ai-suggestions" role="tab" aria-selected="false">
+            <img src="{{ url_for('static', filename='icons/sparkles.svg') }}" alt="AI" class="svg-icon-sm">
+            <span>AI Recommendations</span>
+          </button>
+          <button class="tab-button" data-tab="tab-ats-audit" role="tab" aria-selected="false">
+            <img src="{{ url_for('static', filename='icons/shield-check.svg') }}" alt="ATS" class="svg-icon-sm">
+            <span>ATS Audit & Checklists</span>
+          </button>
+          <button class="tab-button" data-tab="tab-extracted-info" role="tab" aria-selected="false">
+            <img src="{{ url_for('static', filename='icons/user.svg') }}" alt="Profile" class="svg-icon-sm">
+            <span>Parsed Qualifications</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content-area">
+
+        <!-- TAB 1: SKILLS & MATCH ANALYSIS -->
+        <div id="tab-skills" class="tab-pane active" role="tabpanel">
+          
+          <!-- Skills Badges Comparison Row -->
+          <div class="skills-grid-row">
+            
+            <!-- Matched Skills Card -->
+            <div class="card skill-card-matched">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/check-circle.svg') }}" alt="Check Icon" class="svg-icon icon-success">
+                  <h3>Matched Skills (<span id="matched-count">0</span>)</h3>
+                </div>
+                <span class="badge-pill-success">Present in Resume</span>
+              </div>
+              <div class="card-body">
+                <p class="section-hint">These skills and keywords from the job description were successfully detected in your resume.</p>
+                <div id="matched-skills-list" class="skills-badge-wrap">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Missing Skills Card -->
+            <div class="card skill-card-missing">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/alert-triangle.svg') }}" alt="Alert Icon" class="svg-icon icon-warning">
+                  <h3>Missing Critical Skills (<span id="missing-count">0</span>)</h3>
+                </div>
+                <span class="badge-pill-warning">Required by JD</span>
+              </div>
+              <div class="card-body">
+                <p class="section-hint">High-value keywords required by the job posting that are currently absent from your resume text.</p>
+                <div id="missing-skills-list" class="skills-badge-wrap">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Resume Skills Card -->
+            <div class="card skill-card-bonus">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/code.svg') }}" alt="Code Icon" class="svg-icon icon-info">
+                  <h3>Additional Resume Skills (<span id="additional-count">0</span>)</h3>
+                </div>
+                <span class="badge-pill-info">Bonus Strengths</span>
+              </div>
+              <div class="card-body">
+                <p class="section-hint">Other technical competencies detected in your resume that offer bonus versatility.</p>
+                <div id="additional-skills-list" class="skills-badge-wrap">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Visual Analytics Row: Radar & Category Bars -->
+          <div class="analytics-charts-grid">
+            <!-- Radar Chart: Domain Competency -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/chart-bar.svg') }}" alt="Radar" class="svg-icon">
+                  <h3>Domain Skill Coverage</h3>
+                </div>
+              </div>
+              <div class="card-body chart-wrapper">
+                <canvas id="radarChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Category Breakdown Table & Bars -->
+            <div class="card breakdown-card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/layers.svg') }}" alt="Layers" class="svg-icon">
+                  <h3>Category Match Breakdown</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="category-bars-list" class="category-bars-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: AI RECOMMENDATIONS -->
+        <div id="tab-ai-suggestions" class="tab-pane" role="tabpanel">
+          
+          <!-- AI Engine Header Banner -->
+          <div class="ai-source-banner">
+            <div class="ai-badge-group">
+              <img src="{{ url_for('static', filename='icons/sparkles.svg') }}" alt="Sparkles" class="svg-icon">
+              <div>
+                <span class="ai-banner-title">AI Resume Optimization Engine</span>
+                <span id="ai-engine-source" class="ai-banner-engine">Gemini AI / Contextual Model</span>
+              </div>
+            </div>
+            <div id="recruiter-verdict-pill" class="verdict-pill">
+              Interview Readiness: Evaluating...
+            </div>
+          </div>
+
+          <!-- Section 1: Executive Summary Critique & Tailored Rewrite -->
+          <div class="card ai-card-highlight">
+            <div class="card-header">
+              <div class="card-header-title">
+                <img src="{{ url_for('static', filename='icons/feather.svg') }}" alt="Pen" class="svg-icon">
+                <h3>Tailored Professional Summary Recommendation</h3>
+              </div>
+              <button id="copy-summary-btn" class="btn-copy" title="Copy to clipboard">
+                <img src="{{ url_for('static', filename='icons/copy.svg') }}" alt="Copy" class="svg-icon-xs">
+                <span>Copy</span>
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="critique-box">
+                <strong>Current Position Assessment:</strong>
+                <p id="ai-summary-critique">Evaluating positioning...</p>
+              </div>
+              <div class="tailored-box">
+                <strong>Recommended Tailored Headline & Summary:</strong>
+                <p id="ai-tailored-summary">Generating tailored proposal...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Bullet Point Improvements (STAR Method) -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-title">
+                <img src="{{ url_for('static', filename='icons/zap.svg') }}" alt="Action" class="svg-icon">
+                <h3>Bullet Point Upgrades (Action Verbs & Measurable Metrics)</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="section-hint">High-impact rewrites converting passive duties into quantifiable achievements using the STAR method.</p>
+              <div id="ai-bullet-improvements-list" class="bullet-improvements-grid">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Keyword Insertion & Recommended Action Verbs -->
+          <div class="ai-columns-row">
+            <!-- Keyword Strategy -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/search.svg') }}" alt="Search" class="svg-icon">
+                  <h3>Keyword Integration Strategy</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <ul id="ai-keyword-tips-list" class="checklist-styled">
+                  <!-- Populated via JS -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Recommended Action Verbs -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/sparkles.svg') }}" alt="Verbs" class="svg-icon">
+                  <h3>Power Action Verbs for this Role</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <p class="section-hint">Click any action verb to copy it into your clipboard:</p>
+                <div id="ai-action-verbs-list" class="verbs-pill-wrap">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 3: ATS AUDIT & CHECKLISTS -->
+        <div id="tab-ats-audit" class="tab-pane" role="tabpanel">
+          
+          <div class="ats-grid-layout">
+            <!-- ATS Checklist -->
+            <div class="card ats-checklist-card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/shield-check.svg') }}" alt="ATS Shield" class="svg-icon">
+                  <h3>Applicant Tracking System (ATS) Diagnostic</h3>
+                </div>
+                <span id="ats-rating-badge" class="badge-pill-success">Rating</span>
+              </div>
+              <div class="card-body">
+                <p class="section-hint">Ensures your document adheres to automated parser standards (headers, word count, metrics, coordinates).</p>
+                <div id="ats-checklist-items" class="ats-checklist-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Strengths and Areas for Improvement -->
+            <div class="card-col-stack">
+              <!-- Strengths Card -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-header-title">
+                    <img src="{{ url_for('static', filename='icons/check-circle.svg') }}" alt="Strengths" class="svg-icon icon-success">
+                    <h3>Identified Strengths</h3>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul id="strengths-list" class="bullet-list-success">
+                    <!-- Populated via JS -->
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Areas for Improvement Card -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-header-title">
+                    <img src="{{ url_for('static', filename='icons/alert-triangle.svg') }}" alt="Improvements" class="svg-icon icon-warning">
+                    <h3>Areas for Improvement</h3>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <ul id="improvements-list" class="bullet-list-warning">
+                    <!-- Populated via JS -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB 4: PARSED QUALIFICATIONS -->
+        <div id="tab-extracted-info" class="tab-pane" role="tabpanel">
+          
+          <div class="parsed-info-grid">
+            <!-- Contact Info -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/user.svg') }}" alt="User" class="svg-icon">
+                  <h3>Candidate & Contact Details</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="contact-details-grid" id="parsed-contact-details">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Education -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/graduation-cap.svg') }}" alt="Education" class="svg-icon">
+                  <h3>Educational Qualifications</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="parsed-education-list" class="timeline-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="card card-span-2">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/briefcase.svg') }}" alt="Work" class="svg-icon">
+                  <h3>Work Experience & Internships</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="parsed-experience-list" class="timeline-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Projects & Certifications -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/layers.svg') }}" alt="Projects" class="svg-icon">
+                  <h3>Key Projects</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="parsed-projects-list" class="compact-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-header-title">
+                  <img src="{{ url_for('static', filename='icons/award.svg') }}" alt="Certifications" class="svg-icon">
+                  <h3>Certifications & Licenses</h3>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="parsed-certifications-list" class="compact-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Interactive Resume Improvement Assistant Section -->
+    <section id="assistant-section" class="assistant-section">
+      <div class="card assistant-tool-card">
+        <div class="card-header">
+          <div class="card-header-title">
+            <img src="{{ url_for('static', filename='icons/sparkles.svg') }}" alt="Assistant" class="svg-icon icon-sparkle">
+            <div>
+              <h2>Interactive Resume Improvement Assistant</h2>
+              <p class="subtitle">Test and rephrase individual resume bullets into high-impact, metric-driven statements.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="assistant-form-grid">
+            <div class="assistant-input-col">
+              <label for="bullet-input" class="form-label">Paste a weak or draft bullet point:</label>
+              <textarea 
+                id="bullet-input" 
+                rows="4" 
+                class="form-textarea"
+                placeholder="e.g. Worked with the development team to build an e-commerce website and fix bugs."
+              ></textarea>
+              <div class="assistant-btn-row">
+                <button type="button" id="rephrase-bullet-btn" class="btn-primary">
+                  <img src="{{ url_for('static', filename='icons/zap.svg') }}" alt="Zap" class="svg-icon-sm">
+                  <span>Rephrase with Metrics & Action Verbs</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="assistant-output-col">
+              <label class="form-label">Upgraded Variations:</label>
+              <div id="bullet-results-box" class="bullet-results-box">
+                <div class="placeholder-tip">
+                  <img src="{{ url_for('static', filename='icons/info.svg') }}" alt="Info" class="svg-icon-sm">
+                  <span>Type a bullet point on the left and click Rephrase to generate high-impact STAR revisions.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Analysis History Drawer / Modal -->
+  <div id="history-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <img src="{{ url_for('static', filename='icons/history.svg') }}" alt="History" class="svg-icon">
+          <h3>Saved Analysis History</h3>
+        </div>
+        <button id="close-history-btn" class="modal-close" aria-label="Close history modal">
+          <img src="{{ url_for('static', filename='icons/x-circle.svg') }}" alt="Close" class="svg-icon">
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="history-list" class="history-list">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="clear-history-btn" class="btn-danger-outline">
+          <img src="{{ url_for('static', filename='icons/trash.svg') }}" alt="Trash" class="svg-icon-sm">
+          <span>Clear All History</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <p>Resume Analyzer • GDG AIML Selection Project</p>
+      <p class="footer-credits">Built with Python, Flask, PyMuPDF, Scikit-learn, Chart.js, and Google Gemini API</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
