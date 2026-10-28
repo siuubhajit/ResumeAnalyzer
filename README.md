@@ -74,43 +74,46 @@ In modern recruitment workflows, Applicant Tracking Systems (ATS) and human recr
 
 ## Architecture & Analysis Methodology
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   Frontend (Web UI)                    │
-│   HTML5 • Modern CSS (Dark/Light) • Modular Vanilla JS │
-│         Chart.js Visualizations • SVG Vector Icons     │
-└──────────────────────────┬─────────────────────────────┘
-                           │ Multipart Form-Data
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│                  Flask Backend (app.py)                │
-└─────┬────────────────────┬───────────────────────┬─────┘
-      │                    │                       │
-      ▼                    ▼                       ▼
-┌──────────────┐   ┌───────────────┐       ┌───────────────┐
-│  Extractor   │   │    Parser     │       │   Analyzer    │
-│  (PyMuPDF)   │   │  (Taxonomy,   │       │(TF-IDF, Cosine│
-│ Text/Pages/  │──▶│  Regex, Regex │──────▶│  Similarity,  │
-│  Validation  │   │   Sections)   │       │ ATS Diagnostic│
-└──────────────┘   └───────────────┘       └───────┬───────┘
-                                                   │
-                                                   ▼
-                                           ┌───────────────┐
-                                           │  AISuggester  │
-                                           │ Google Gemini │
-                                           │  API / Fallback│
-                                           └───────────────┘
+```mermaid
+flowchart TD
+    subgraph UI ["User Interface (Frontend)"]
+        A["PDF Resume Upload<br/>(Client Validation & Drag-and-Drop)"]
+        B["Target Job Description<br/>(Sample Selector or Custom Text)"]
+        C["Interactive Analytics Dashboard<br/>(Match Gauge, Radar Chart, ATS Diagnostics)"]
+    end
+
+    subgraph Server ["Flask Backend (app.py)"]
+        D["Resume Extractor<br/>(PyMuPDF / fitz Text & Metadata)"]
+        E["Resume Parser<br/>(Taxonomy & Section Classifier)"]
+        F["Match Analyzer<br/>(TF-IDF, Cosine Similarity, Overlap)"]
+        G["AI Optimization Engine<br/>(Google Gemini API / Contextual Fallback)"]
+    end
+
+    A -->|Upload PDF Stream| D
+    B -->|Submit Job Text| F
+    D -->|Raw Extracted Text| E
+    E -->|Structured Skills & Sections| F
+    F -->|Match Metrics & Skill Gaps| G
+    G -->|STAR Bullet Rewrites & Recommendations| C
+    F -->|Match Percentage & ATS Diagnostic| C
 ```
 
 ### Match Scoring Formula
-The overall match score $S_{\text{overall}}$ is calculated as:
-$$S_{\text{overall}} = 0.40 \times S_{\text{tech}} + 0.35 \times S_{\text{tfidf}} + 0.15 \times S_{\text{soft}} + 0.10 \times S_{\text{ats}}$$
 
-Where:
-- $S_{\text{tech}} = \frac{|\text{Resume Technical Skills} \cap \text{JD Technical Skills}|}{\max(1, |\text{JD Technical Skills}|)} \times 100$
-- $S_{\text{tfidf}} = \text{CosineSimilarity}(\vec{V}_{\text{resume}}, \vec{V}_{\text{jd}}) \times 140$ (scaled and bounded $[0, 100]$)
-- $S_{\text{soft}} = \frac{|\text{Resume Soft Skills} \cap \text{JD Soft Skills}|}{\max(1, |\text{JD Soft Skills}|)} \times 100$
-- $S_{\text{ats}} = \text{Applicant Tracking System Compliance Score } [0, 100]$
+The overall match score is calculated using a weighted composite formula:
+
+```math
+Score_overall = (0.40 × S_tech) + (0.35 × S_tfidf) + (0.15 × S_soft) + (0.10 × S_ats)
+```
+
+#### Formula Breakdown & Weight Distribution
+
+| Component | Weight | Metric Definition | Description |
+| :--- | :---: | :--- | :--- |
+| **Technical Skills ($S_{\text{tech}}$)** | **40%** | `(Matched Tech Skills / Required Tech Skills) × 100` | Measures coverage of essential programming languages, frameworks, databases, and cloud tools required by the job. |
+| **TF-IDF Similarity ($S_{\text{tfidf}}$)** | **35%** | `CosineSimilarity(Resume_Vector, JD_Vector) × 140` | Computes semantic and vocabulary overlap between the resume content and the job description, scaled and bounded to $[0, 100]$. |
+| **Soft Skills ($S_{\text{soft}}$)** | **15%** | `(Matched Soft Skills / Required Soft Skills) × 100` | Evaluates communication, leadership, problem-solving, and team collaboration keywords. |
+| **ATS Compliance ($S_{\text{ats}}$)** | **10%** | `Checklist Score [0 - 100]` | Assesses contact information presence, standard section headers, optimal document word count, and measurable impact metrics. |
 
 ---
 
