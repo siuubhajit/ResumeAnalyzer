@@ -24,3 +24,4 @@
     "description": "Job Title: Frontend Web Developer\n\nAbout the Role:\nJoin our design-focused engineering team to create fast, accessible, and delightful web experiences.\n\nKey Responsibilities:\n- Translate Figma designs and wireframes into clean, modular React and Next.js components.\n- Utilize Tailwind CSS, HTML5, and CSS3 to craft pixel-perfect, mobile-responsive interfaces.\n- Integrate state management using Redux or Zustand and connect with GraphQL / REST APIs.\n- Ensure web accessibility (WCAG) and optimize Largest Contentful Paint (LCP) performance.\n- Write unit and component tests using Jest and React Testing Library.\n\nQualifications & Requirements:\n- Solid mastery of JavaScript (ES6+), TypeScript, HTML5, and CSS3.\n- Proven experience with React, Next.js, and modern CSS tooling (Tailwind CSS).\n- Experience with Git, npm, Postman, and Chrome DevTools.\n- Strong aesthetic sense, attention to detail, and collaborative mindset."
   }
 ]
+

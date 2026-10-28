@@ -168,3 +168,4 @@ class ResumeExtractor:
         text = re.sub(r'[ ]{2,}', ' ', text)
 
         return text.strip()
+

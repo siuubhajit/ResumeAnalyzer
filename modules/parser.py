@@ -347,3 +347,4 @@ class ResumeParser:
             if 4 <= len(cleaned) <= 120:
                 cert_lines.append(cleaned)
         return cert_lines[:8]
+

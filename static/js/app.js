@@ -722,3 +722,4 @@ function renderParsedProfile(profile) {
     `).join('') : `<p style="font-size: 0.85rem; color: var(--text-muted);">No certifications section detected.</p>`;
   }
 }
+

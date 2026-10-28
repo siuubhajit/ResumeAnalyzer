@@ -285,3 +285,4 @@ ResumeAnalyzer/
 
 ## License
 Developed as part of the **GDG AIML Selection Project**. Licensed under the [MIT License](LICENSE).
+

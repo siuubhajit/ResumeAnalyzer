@@ -409,3 +409,4 @@ class ResumeAnalyzer:
             improvements.append("Consider adding specific certifications or recent project links to reinforce your match.")
 
         return strengths[:5], improvements[:5]
+

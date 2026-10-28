@@ -233,3 +233,4 @@ The JSON must adhere to this exact schema:
             "action_verbs_recommended": action_verbs,
             "recruiter_verdict": verdict
         }
+
