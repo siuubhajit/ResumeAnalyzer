@@ -1,0 +1,26 @@
+[
+  {
+    "id": "swe_fullstack",
+    "title": "Full Stack Software Engineer",
+    "company": "TechCorp Global",
+    "description": "Job Title: Full Stack Software Engineer\n\nAbout the Role:\nWe are seeking a talented Full Stack Software Engineer to build scalable web applications. You will collaborate with product managers, designers, and backend engineers to architect modern user interfaces and robust APIs.\n\nKey Responsibilities:\n- Design, develop, and maintain responsive web applications using React, TypeScript, and Node.js.\n- Build efficient, secure REST APIs and microservices using Python (FastAPI or Flask) or Express.\n- Optimize PostgreSQL and Redis databases for maximum performance and reliability.\n- Deploy and manage containerized services using Docker and Kubernetes on AWS or GCP.\n- Implement automated CI/CD pipelines using GitHub Actions.\n- Participate in Agile/Scrum ceremonies, code reviews, and mentor junior developers.\n\nQualifications & Requirements:\n- Bachelor's degree in Computer Science or equivalent practical experience.\n- 2+ years of experience with Python, JavaScript, TypeScript, and modern frameworks (React, Node.js).\n- Hands-on experience with SQL databases (PostgreSQL, MySQL) and caching with Redis.\n- Experience with Docker, Kubernetes, and Cloud platforms (AWS or GCP).\n- Strong communication, problem-solving, and collaboration skills."
+  },
+  {
+    "id": "data_scientist_aiml",
+    "title": "AI / Machine Learning Engineer",
+    "company": "Apex AI Labs",
+    "description": "Job Title: Machine Learning & Data Science Engineer\n\nAbout the Role:\nApex AI Labs is hiring an AI/ML Engineer to train, evaluate, and deploy predictive models and Generative AI applications.\n\nKey Responsibilities:\n- Research, develop, and optimize machine learning and deep learning pipelines using PyTorch, TensorFlow, and Scikit-Learn.\n- Clean and process large datasets using Pandas, NumPy, and SQL.\n- Build and fine-tune Large Language Model (LLM) workflows using Hugging Face, LangChain, and RAG architectures.\n- Deploy ML models as high-throughput REST APIs using FastAPI and Docker.\n- Track experiments and model performance with tools like MLflow or Weights & Biases.\n- Collaborate across teams to translate complex business problems into machine learning solutions.\n\nQualifications & Requirements:\n- Degree in Computer Science, Data Science, Statistics, or related technical field.\n- Proficiency in Python, Pandas, NumPy, Scikit-Learn, PyTorch, and SQL.\n- Familiarity with NLP, Computer Vision, Transformers, and GenAI techniques.\n- Experience with Docker, Git, and Linux environments.\n- Strong critical thinking, teamwork, and presentation abilities."
+  },
+  {
+    "id": "devops_cloud_engineer",
+    "title": "DevOps & Cloud Infrastructure Engineer",
+    "company": "CloudScale Systems",
+    "description": "Job Title: DevOps & Cloud Infrastructure Engineer\n\nAbout the Role:\nWe are seeking a DevOps Engineer to design, automate, and maintain our enterprise cloud infrastructure and deployment pipelines.\n\nKey Responsibilities:\n- Automate cloud infrastructure provisioning using Terraform and AWS CloudFormation.\n- Manage, scale, and monitor production Kubernetes (EKS) clusters and Docker containers.\n- Build resilient CI/CD pipelines using Jenkins, GitLab CI, or GitHub Actions.\n- Monitor system health, latency, and uptime using Prometheus, Grafana, and ELK stack.\n- Implement security best practices, access management, and vulnerability patching across Linux systems.\n- Lead incident response, root cause analysis, and disaster recovery planning.\n\nQualifications & Requirements:\n- 3+ years of experience in DevOps, Cloud Engineering, or Systems Administration.\n- Deep expertise in AWS (or GCP/Azure), Linux/Unix, and Bash/Shell scripting.\n- Strong experience with Docker, Kubernetes, Helm, and Terraform.\n- Familiarity with Python, Go, or Node.js for automation scripts.\n- Excellent problem-solving, communication, and time management skills."
+  },
+  {
+    "id": "frontend_ui_developer",
+    "title": "Frontend UI/UX Developer",
+    "company": "Vibrant Studio",
+    "description": "Job Title: Frontend Web Developer\n\nAbout the Role:\nJoin our design-focused engineering team to create fast, accessible, and delightful web experiences.\n\nKey Responsibilities:\n- Translate Figma designs and wireframes into clean, modular React and Next.js components.\n- Utilize Tailwind CSS, HTML5, and CSS3 to craft pixel-perfect, mobile-responsive interfaces.\n- Integrate state management using Redux or Zustand and connect with GraphQL / REST APIs.\n- Ensure web accessibility (WCAG) and optimize Largest Contentful Paint (LCP) performance.\n- Write unit and component tests using Jest and React Testing Library.\n\nQualifications & Requirements:\n- Solid mastery of JavaScript (ES6+), TypeScript, HTML5, and CSS3.\n- Proven experience with React, Next.js, and modern CSS tooling (Tailwind CSS).\n- Experience with Git, npm, Postman, and Chrome DevTools.\n- Strong aesthetic sense, attention to detail, and collaborative mindset."
+  }
+]
