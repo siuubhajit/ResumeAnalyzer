@@ -13,8 +13,7 @@ An intelligent, AI-powered web application that evaluates resume qualifications 
 6. [Local Installation & Setup](#local-installation--setup)
 7. [Environment Configuration](#environment-configuration)
 8. [Testing the Application](#testing-the-application)
-9. [Deployment Guide (Render / Railway / Cloud)](#deployment-guide-render--railway--cloud)
-10. [Evaluation Criteria Coverage](#evaluation-criteria-coverage)
+9. [Evaluation Criteria Coverage](#evaluation-criteria-coverage)
 
 ---
 
@@ -248,30 +247,6 @@ ResumeAnalyzer/
 
 ---
 
-## Deployment Guide (Render / Railway / Cloud)
-
-### Deploying to Render (Recommended Free/Easy Platform)
-
-1. Push your repository to GitHub:
-   ```bash
-   git add .
-   git commit -m "Initial commit of Resume Analyzer"
-   git push origin main
-   ```
-2. Log in to [Render](https://render.com/) and click **New > Web Service**.
-3. Connect your GitHub repository.
-4. Configure the service settings:
-   - **Environment:** `Python 3`
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app`
-5. In **Environment Variables**, add:
-   - `GEMINI_API_KEY`: *(Your Google AI Studio API key)*
-   - `GEMINI_MODEL`: `gemini-2.5-flash`
-   - `SECRET_KEY`: *(A random string)*
-6. Click **Create Web Service**. Your live application will be deployed and available at `https://<your-service-name>.onrender.com`.
-
----
-
 ## Evaluation Criteria Coverage
 
 | Criterion | Weight | Implementation Details |
@@ -279,7 +254,7 @@ ResumeAnalyzer/
 | **Functionality** | **40%** | Robust PDF extraction with PyMuPDF; comprehensive information extraction (skills, education, experience, contact); hybrid scoring with Scikit-learn TF-IDF + cosine similarity + skill overlap; Gemini AI suggestions with fallback; thorough validation and error handling for corrupt/empty files. |
 | **Code Quality** | **30%** | Clean, modular Python architecture (`extractor.py`, `parser.py`, `analyzer.py`, `ai_suggester.py`, `app.py`); clear separation of concerns; type hints and comprehensive docstrings; zero hardcoded credentials. |
 | **UI / UX** | **20%** | Professional, modern responsive layout; custom Light and Dark theme backgrounds with persistent toggle; interactive Chart.js visualizations (gauge, radar, bars); clear skill tags; **zero emoji icons** (pure SVG vectors throughout); printable reports. |
-| **Documentation & Git** | **10%** | Comprehensive README.md with architecture overview, mathematical formulations, local setup instructions, deployment guide, and clean Git commit history. |
+| **Documentation & Git** | **10%** | Comprehensive README.md with architecture overview, mathematical formulations, local setup instructions, testing workflows, and clean Git commit history. |
 
 ---
 
